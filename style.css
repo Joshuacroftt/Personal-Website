@@ -1,0 +1,17 @@
+    div {
+        color:azure
+    }
+    body {
+        background-color:bisque
+    }
+    .info {
+        background-color:blueviolet
+    }
+    * {
+    margin: 0;
+    padding: 0;
+}
+    #aboutButton {
+      background-color:#ffdc15;
+      color:black;
+    }
