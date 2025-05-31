@@ -3,16 +3,20 @@
  
   <head>
     <link rel="stylesheet" href="style.css">
-    <title>Hello</title>
+    <script src="script.js"></script>
+    <title>Joshua Croft Website</title>
   </head>
   <body>
+    
     <h1>
-      <button id="aboutButton"> About Me!</button>
+      <button id="permButton" onclick="setup();"> Click me to enable microphone access! </button>
+      <button id="startButton" onclick="draw();"> Start Visualizer </button>
+      <div class="center">
+        <button id="aboutButton" class="center" onclick="redirect('about.html')"> About Me!</button>
+      </div>
     </h1>
-    <p><a href="about.html">About Me!</a></p>
-    <hl>Hello You Fool</hl>
     <br><br><br>
-    <img src="87654287_p0.png" width="640" height="360">
+    <canvas id="visualizer" width="600" height="200"></canvas>
     <br>
     <video width="640" height="360" autoplay loop>
         
