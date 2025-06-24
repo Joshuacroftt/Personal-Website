@@ -1,0 +1,7 @@
+Singing assesment: The less non-harmonic partials present in singing voice = Higher score
+Cut out microphone noise from Spectrum by subtracting noise from baseline test
+
+
+Layout of Home Page:
+
+About Me Button			Voice Visualizer Button				Singing Voice Score Button
