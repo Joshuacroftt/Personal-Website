@@ -15,10 +15,12 @@ function revealText() {
     
 }
 let audioContext;
-let stream;
-let streamSource;
+let stream; // MediaStream object to hold the audio stream
+let streamSource; // MediaStreamAudioSourceNode to connect the audio stream to the audio context
 let analyzer;
 let binArray;
+let averageBinArray; // Array to hold the averaged frequency data for calibration
+let mediaRecorder;
 let canvas = document.getElementById("visualizer");
 let ctx = canvas.getContext("2d");
 const RADIUS = 200;
@@ -29,6 +31,7 @@ ctx.arc(RADIUS, RADIUS, RADIUS, 0, 2 * Math.PI);
 ctx.clip();
 const cx = RADIUS
 const cy = RADIUS
+const NORMALIZE_COUNT = 25000; // Number of times to average the frequency data for calibration
 
 async function setup() {
     stream = await navigator.mediaDevices.getUserMedia({video:false, audio:true});
@@ -36,11 +39,27 @@ async function setup() {
     streamSource = audioContext.createMediaStreamSource(stream);
     analyzer = audioContext.createAnalyser();
     streamSource.connect(analyzer);
-    analyzer.fftSize = 512;
+    analyzer.fftSize = 1024;
     binArray = new Uint8Array(analyzer.frequencyBinCount);
     analyzer.getByteFrequencyData(binArray);
-    BIN_COUNT = binArray.length / 8;
+    BIN_COUNT = binArray.length / 4;
     traverseCircle(RADIUS);
+}
+
+function calibrate() {
+    averageBinArray = new Float32Array(analyzer.frequencyBinCount);
+    for (let i = 0; i < NORMALIZE_COUNT; i++) {
+    analyzer.getByteFrequencyData(binArray);
+        for (let k = 0; k < binArray.length; k++) {
+            averageBinArray[k] = averageBinArray[k] + binArray[k];
+            
+            if (i == NORMALIZE_COUNT - 1) {
+                averageBinArray[k] /= NORMALIZE_COUNT;
+            }
+        }
+    }
+    console.log("Calibration complete. Average frequency data:", averageBinArray);
+
 }
 
 let posArray = [];
@@ -57,10 +76,11 @@ function draw() {
     analyzer.getByteFrequencyData(binArray);
     requestAnimationFrame(draw);
     ctx.save();
-    ctx.fillStyle = 'rgba(255, 213, 220, 0.5)';
+    ctx.fillStyle = 'rgb(255, 228, 196)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     let x = 0;
     for (let i = 0; i < BIN_COUNT; i++) {
+        binArray[i] = binArray[i] - averageBinArray[i];
         if (binArray[i] < 20) {
             binArray[i] = 0;
         }
@@ -82,17 +102,23 @@ function draw() {
         ctx.stroke();
     }
 }
-
 function drawGraph() {
     analyzer.getByteFrequencyData(binArray);
     requestAnimationFrame(drawGraph);
     ctx.save();
-    ctx.fillStyle = 'rgba(255, 213, 220, 0.5)';
+    ctx.fillStyle = 'rgb(255, 228, 196)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     let x = 0;
     ctx.moveTo(cx, cy);
     ctx.beginPath();
     for (let i = 0; i < BIN_COUNT; i++) {
+        if (!(binArray[i] < averageBinArray[i])) {
+            binArray[i] = binArray[i] - averageBinArray[i];
+        }
+        else {
+            binArray[i] = 0;
+        }
+
         if (binArray[i] < 20) {
             binArray[i] = 0;
         }
